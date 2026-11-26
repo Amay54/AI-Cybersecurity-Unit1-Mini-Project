@@ -1,8 +1,6 @@
 """
 AI-Driven Cyber Threat Awareness and Detection Prototype
-Academic Mini-Project: Cyber Threat Detection using the TON_IoT Network Dataset
-Author: Dhruv Arora
-Maintained & Evaluated by: Amay Yadav (Roll No: 2301730311, 4th Year, Section E, B.Tech CSE AI & ML)
+Academic Project: Cyber Threat Detection using the TON_IoT Network Dataset
 """
 
 import os
@@ -34,8 +32,7 @@ from sklearn.metrics import (
 def main():
     print("=" * 70)
     print("  AI-Driven Cyber Threat Awareness & Detection Prototype (TON_IoT)")
-    print("  Author: Dhruv Arora | Maintained by: Amay Yadav (Roll: 2301730311)")
-    print("  Unit 1 Cybersecurity Mini-Project: Hyperparameter Tuned Architecture")
+    print("  Academic Cybersecurity Practical Project: Machine Learning Pipeline")
     print("=" * 70)
 
     # -------------------------------------------------------------
