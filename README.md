@@ -1,18 +1,33 @@
 # AI-Driven Cyber Threat Awareness and Detection Prototype
 **Unit 1 Academic Mini-Project: AI in Cybersecurity**  
-**Author:** Dhruv Arora  
-**Repository:** [DhruvArora664/ai-cybersecurity-unit1-mini-project-dhruv](https://github.com/DhruvArora664/ai-cybersecurity-unit1-mini-project-dhruv)
+
+### 👥 Authorship & Project Attribution
+- **Original Implementation & Architecture:** Dhruv Arora ([@DhruvArora664](https://github.com/DhruvArora664))
+  - Original Repository: [DhruvArora664/ai-cybersecurity-unit1-mini-project-dhruv](https://github.com/DhruvArora664/ai-cybersecurity-unit1-mini-project-dhruv)
+- **Documentation Contribution, Academic Evaluation & Repository Curation:** Amay Yadav ([@Amay54](https://github.com/Amay54))
+  - Maintained Repository: [Amay54/AI-Cybersecurity-Unit1-Mini-Project](https://github.com/Amay54/AI-Cybersecurity-Unit1-Mini-Project)
+  - Comprehensive Technical Project Report: [`reports/PROJECT_REPORT.md`](reports/PROJECT_REPORT.md)
 
 An end-to-end academic cybersecurity machine learning project that processes telemetry from the **TON_IoT Network Dataset**, performs exploratory threat data analysis, trains and benchmarks Machine Learning (**DecisionTreeClassifier**) and Deep Learning (**MLPClassifier**) detection engines, and evaluates operational security trade-offs (False Positives vs. False Negatives) under aggressive threat mitigation postures.
+
+---
+
+## 📄 Documentation Contribution: Academic Project Report
+As part of extending this academic project for technical evaluation, portfolio presentation, and deep architectural audit, a university-level comprehensive project report was authored by **Amay Yadav**:
+- **Full Report:** [**`reports/PROJECT_REPORT.md`**](reports/PROJECT_REPORT.md)
+- **Sections Covered:** Abstract, Introduction, Problem Statement, Objectives, Cybersecurity Concepts, Technologies Used, Dataset Description (TON_IoT), Architecture Diagrams, Implementation Details (Data Leakage Elimination & Preprocessing), Methodology, Results & Observations, Visualizations, Advantages, Limitations, Future Scope, Conclusion, and Academic References.
+- **Key Insight:** Documents the real-world operational security dilemma between False Positives and False Negatives, demonstrating why sub-second Decision Trees ($99.89\%$ accuracy) provide ideal edge line-rate deployment, while tuned neural confidence thresholds enable tiered mitigation architectures.
 
 ---
 
 ## 📁 Project Directory Structure
 
 ```text
-ai-cybersecurity-unit1-mini-project-dhruv/
+AI-Cybersecurity-Unit1-Mini-Project/
 ├── data/
 │   └── .gitkeep                     # Preserves cached data directory (gitignored)
+├── reports/
+│   └── PROJECT_REPORT.md            # Comprehensive academic technical project report
 ├── src/
 │   ├── main.ipynb                   # Fully executed, interactive Jupyter Notebook with live outputs
 │   └── main.py                      # Standalone, end-to-end Python pipeline script
