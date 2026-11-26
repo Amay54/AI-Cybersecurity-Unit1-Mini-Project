@@ -1,10 +1,11 @@
-# Comprehensive Technical Project Report: AI-Driven Cyber Threat Awareness and Detection Prototype
+# Technical Project Report: AI-Driven Cyber Threat Awareness and Detection Prototype
 
-**Course / Module:** Unit 1 Academic Mini-Project: Artificial Intelligence in Cybersecurity  
-**Original System Architecture & Pipeline Development:** Dhruv Arora ([DhruvArora664/ai-cybersecurity-unit1-mini-project-dhruv](https://github.com/DhruvArora664/ai-cybersecurity-unit1-mini-project-dhruv))  
-**Academic Documentation, Evaluation Synthesis & Repository Curation:** Amay Yadav ([Amay54/AI-Cybersecurity-Unit1-Mini-Project](https://github.com/Amay54/AI-Cybersecurity-Unit1-Mini-Project))  
-**Date of Technical Audit:** November 2026  
-**Document Classification:** Academic Research & Technical Evaluation Report  
+**Name:** Amay Yadav  
+**Roll Number:** 2301730311  
+**Year:** 4th Year  
+**Section:** Section E  
+**Course:** B.Tech CSE (AI & ML)  
+**Module:** Unit 1 Academic Mini-Project: Artificial Intelligence in Cybersecurity  
 
 ---
 
