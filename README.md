@@ -50,19 +50,23 @@ AI-Cybersecurity-Unit1-Mini-Project/
 
 ---
 
-## 🔬 Benchmark Results & Comparative Evaluation
+## 🔬 Benchmark Results & Comparative Evaluation (Tuned Hyperparameters)
 
 Models were evaluated on a stratified test set of **20,000 network flows** (80/20 train-test split on 100,000 telemetry records) with strict isolation to prevent data leakage (encoders and scalers fitted solely on the training partition).
 
+### Hyperparameter Configurations:
+- **Decision Tree (ML):** `criterion='entropy'`, `max_depth=15`, `min_samples_split=4`, `min_samples_leaf=2`, `random_state=42`
+- **MLP Neural Network (DL):** `hidden_layer_sizes=(128, 64)`, `activation='relu'`, `solver='adam'`, `alpha=0.0005`, `batch_size=256`, `max_iter=30`, `early_stopping=True`
+
 ### Model Performance Comparison
 
-| Metric | Decision Tree (ML) | MLP Neural Network (DL) |
+| Metric | Tuned Decision Tree (ML) | Tuned MLP Neural Network (DL) |
 | :--- | :---: | :---: |
-| **Accuracy** | **99.89%** | 99.42% |
-| **Precision** | **0.9993** | 0.9950 |
-| **Recall** | **0.9994** | 0.9978 |
-| **F1-Score** | **0.9993** | 0.9964 |
-| **Training Time** | **0.731s** | 14.436s (~20x slower) |
+| **Accuracy** | **99.89%** | 99.44% |
+| **Precision** | **0.9993** | 0.9953 |
+| **Recall** | **0.9993** | 0.9979 |
+| **F1-Score** | **0.9993** | 0.9966 |
+| **Training Time** | **0.909s** | 41.071s (~45x slower) |
 | **Interpretability** | High (White-box rules) | Low (Black-box weights) |
 | **Edge Deployment** | Ideal for line-rate edge IDS | Requires hardware acceleration |
 
@@ -76,13 +80,13 @@ In operational Security Operations Centers (SOCs), threat detection thresholds a
 
 ### Simulation Metrics:
 * **Standard Posture (Threshold = 0.50):**
-  * Attacks Caught (True Positives): 16,168
-  * Attacks Missed (False Negatives): 41
-  * Legitimate Disrupted (False Positives): 80 (2.11%)
+  * Attacks Caught (True Positives): 16,175
+  * Attacks Missed (False Negatives): 34
+  * Legitimate Disrupted (False Positives): 76 (2.00%)
 * **Aggressive Posture (Threshold = 0.30):**
-  * Attacks Caught (True Positives): 16,181 (**Recall: 99.83%**)
-  * Attacks Missed (False Negatives): **28** (31.7% reduction in missed threats)
-  * Legitimate Disrupted (False Positives): **103 (2.72%)**
+  * Attacks Caught (True Positives): 16,184 (**Recall: 99.85%**)
+  * Attacks Missed (False Negatives): **25** (26.5% reduction in missed threats)
+  * Legitimate Disrupted (False Positives): **100 (2.64%)**
 
 ### Ethical Dilemma & SOC Trade-Offs:
 1. **Self-Inflicted Denial of Service:** Lowering the threshold successfully catches more stealth attacks, but falsely blocks 103 legitimate user sessions (2.72% false alarm rate), causing business interruption.

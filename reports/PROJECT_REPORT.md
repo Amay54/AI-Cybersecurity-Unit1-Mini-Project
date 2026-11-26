@@ -13,7 +13,7 @@
 
 Modern digital architectures, enterprise networks, and Internet of Things (IoT) ecosystems face increasingly automated, multi-vector, and stealthy cyber attacks. Conventional Signature-based Network Intrusion Detection Systems (NIDS) are inherently reactive, failing to identify novel zero-day exploits, polymorphism, and sophisticated distributed denial-of-service variants. This project presents the rigorous development, benchmarking, and security posture evaluation of an **AI-Driven Cyber Threat Awareness and Detection Prototype** evaluated on real-world heterogeneous network telemetry from the benchmark **TON_IoT Network Dataset** (originating from the Australian Defence Force Academy / UNSW Canberra Cyber). 
 
-The empirical methodology evaluates two distinct AI paradigms across 100,000 network flows under strict train/test data isolation: a deterministic white-box Machine Learning model (**Decision Tree Classifier**, max depth 12) and a non-linear representation Deep Learning architecture (**Multi-Layer Perceptron**, 64-32 hidden units with ReLU activations). The Decision Tree achieved a training duration of **0.5387 seconds** with an overall test accuracy of **99.89%** ($F_1$-score: 0.9993), while the MLP neural network achieved an accuracy of **99.42%** ($F_1$-score: 0.9964) with a training time of **12.2785 seconds**. Crucially, the research extends beyond raw accuracy metrics by conducting an ethical and operational simulation of Security Operations Center (SOC) trade-offs. By lowering the classification threshold from a standard $0.50$ to an aggressive $0.30$, missed attacks (False Negatives) were reduced by 31.7% (from 41 to 28 missed attacks, achieving 99.83% attack recall), at the cost of misclassifying 103 legitimate sessions as malicious (2.72% false alarm rate). The report synthesizes these empirical findings into a defense-in-depth tiered mitigation framework suitable for real-time edge and core network defense.
+The empirical methodology evaluates two distinct AI paradigms across 100,000 network flows under strict train/test data isolation: a tuned deterministic white-box Machine Learning model (**Decision Tree Classifier**, criterion='entropy', max depth 15, min_samples_split 4, min_samples_leaf 2) and an expanded non-linear representation Deep Learning architecture (**Multi-Layer Perceptron**, 128-64 hidden units, alpha 0.0005, batch size 256, max iterations 30). The Decision Tree achieved a training duration of **0.9094 seconds** with an overall test accuracy of **99.89%** ($F_1$-score: 0.9993), while the MLP neural network achieved an improved accuracy of **99.44%** ($F_1$-score: 0.9966) with a training time of **41.0709 seconds**. Crucially, the research extends beyond raw accuracy metrics by conducting an ethical and operational simulation of Security Operations Center (SOC) trade-offs. By lowering the classification threshold from a standard $0.50$ to an aggressive $0.30$, missed attacks (False Negatives) were reduced by 26.5% (from 34 down to 25 missed attacks, achieving 99.85% attack recall), at the cost of misclassifying 100 legitimate sessions as malicious (2.64% false alarm rate). The report synthesizes these empirical findings into a defense-in-depth tiered mitigation framework suitable for real-time edge and core network defense.
 
 ---
 
@@ -251,28 +251,30 @@ X_test[c] = X_test[c].map(class_mapping).fillna(len(le.classes_)).astype(int)
 
 ## 10. Methodology
 
-### 10.1 Machine Learning Architecture: Decision Tree Classifier
-The Decision Tree classifier builds an axis-aligned orthogonal decision surface by greedily partitioning feature space using Gini Impurity:
-$$I_G(p) = 1 - \sum_{i=1}^{J} p_i^2$$
-- **Hyperparameter Configuration:**
-  - `criterion`: `'gini'`
-  - `max_depth`: `12` (constrained to prevent over-fitting on noisy high-frequency attributes)
+### 10.1 Machine Learning Architecture: Tuned Decision Tree Classifier
+The Decision Tree classifier builds an axis-aligned orthogonal decision surface by partitioning feature space using Information Gain (Entropy):
+$$H(S) = -\sum_{i=1}^{c} p_i \log_2(p_i)$$
+- **Tuned Hyperparameter Configuration:**
+  - `criterion`: `'entropy'`
+  - `max_depth`: `15` (expanded tree depth capturing subtle boundary patterns)
+  - `min_samples_split`: `4`
+  - `min_samples_leaf`: `2` (regularization against single-sample noise)
   - `random_state`: `42`
 - **Architectural Suitability:** Highly interpretable; decision rules can be directly exported into hardware firewall lookups, Snort rules, or eBPF kernel packet filters.
 
-### 10.2 Deep Learning Architecture: Multi-Layer Perceptron (MLP)
-The MLP represents a feed-forward Artificial Neural Network (ANN) trained to discover non-linear functional mappings between flow vectors and threat probabilities.
-- **Architectural Topology:**
+### 10.2 Deep Learning Architecture: Tuned Multi-Layer Perceptron (MLP)
+The MLP represents an expanded feed-forward Artificial Neural Network (ANN) trained to discover high-capacity non-linear representations across telemetry features.
+- **Architectural Topology & Hyperparameters:**
   - Input Layer: 40 normalized flow features
-  - Hidden Layer 1: 64 fully connected neurons with Rectified Linear Unit ($\text{ReLU}(z) = \max(0, z)$)
-  - Hidden Layer 2: 32 fully connected neurons with $\text{ReLU}$
+  - Hidden Layer 1: 128 fully connected neurons with Rectified Linear Unit ($\text{ReLU}(z) = \max(0, z)$)
+  - Hidden Layer 2: 64 fully connected neurons with $\text{ReLU}$
   - Output Layer: Softmax / Sigmoidal logistic unit outputting continuous threat probability $P(Y=1|X)$
 - **Optimization & Regularization:**
   - Optimizer: `Adam` (Adaptive Moment Estimation)
-  - Initial Learning Rate: $0.001$
-  - Batching: Mini-batch stochastic gradient descent
-  - Early Stopping: Enabled with internal validation monitoring to curtail overfitting
-  - Maximum Iterations: 25 epochs
+  - Regularization Penalty (`alpha`): $0.0005$ ($L_2$ weight decay)
+  - Batch Size: 256 samples per gradient update
+  - Maximum Iterations: 30 epochs
+  - Early Stopping: Enabled with internal validation monitoring to prevent over-fitting
 
 ### 10.3 Evaluation Metrics
 Performance is quantified using standard binary classification metrics:
@@ -289,13 +291,13 @@ Both models were evaluated on the identical holdout test set of **20,000 unseen 
 
 ### 11.1 Benchmark Performance Metrics
 
-| Metric | Decision Tree (ML) | Multi-Layer Perceptron (DL) | Delta / Analytical Takeaway |
+| Metric | Tuned Decision Tree (ML) | Tuned Multi-Layer Perceptron (DL) | Delta / Analytical Takeaway |
 | :--- | :---: | :---: | :--- |
-| **Accuracy** | **99.89%** | 99.42% | Decision Tree is +0.47% higher on structured tabular telemetry. |
-| **Precision** | **0.9993** | 0.9950 | Decision Tree produces fewer false alarms at standard threshold. |
-| **Recall (Detection Rate)**| **0.9994** | 0.9978 | Both models successfully capture >99.7% of attack vectors. |
-| **$F_1$-Score** | **0.9993** | 0.9964 | Exceptional harmonic balance across both architectures. |
-| **Training Duration** | **0.5387 s** | 12.2785 s | Decision Tree trains **22.8x faster** than the MLP neural network. |
+| **Accuracy** | **99.89%** | 99.44% | Decision Tree is +0.45% higher on structured tabular telemetry. |
+| **Precision** | **0.9993** | 0.9953 | Decision Tree produces fewer false alarms at standard threshold. |
+| **Recall (Detection Rate)**| **0.9993** | 0.9979 | Both models successfully capture >99.7% of attack vectors. |
+| **$F_1$-Score** | **0.9993** | 0.9966 | Exceptional harmonic balance across both architectures. |
+| **Training Duration** | **0.9094 s** | 41.0709 s | Decision Tree trains **45.2x faster** than the MLP neural network. |
 | **Model Interpretability** | High (White-box rules) | Low (Black-box matrix weights) | Tree rules can be inspected and verified by human analysts. |
 | **Inference Footprint** | Extremely low latency | Moderate matrix dot-products | Tree is deployable on low-power edge switches and microcontrollers. |
 
@@ -318,14 +320,14 @@ weighted avg       1.00      1.00      1.00     20000
 ```text
               precision    recall  f1-score   support
 
-      Normal       0.99      0.98      0.98      3791
+      Normal       0.99      0.98      0.99      3791
   Suspicious       1.00      1.00      1.00     16209
 
     accuracy                           0.99     20000
    macro avg       0.99      0.99      0.99     20000
 weighted avg       0.99      0.99      0.99     20000
 ```
-- **Observed Accuracy:** 99.42% ($19,884$ correct classifications out of $20,000$ test flows).
+- **Observed Accuracy:** 99.44% ($19,888$ correct classifications out of $20,000$ test flows).
 
 ---
 
@@ -349,15 +351,15 @@ In Task 5 of the pipeline, continuous predicted threat probabilities $P(\text{Th
 =================================================================
  AGGRESSIVE SECURITY POSTURE SIMULATION (Threshold > 30%)
 =================================================================
-True Negatives (Legitimate Allowed)       : 3,688
-False Positives (Legitimate Blocked)      : 103
-False Negatives (Attacks Missed)          : 28
-True Positives (Attacks Blocked)          : 16,181
+True Negatives (Legitimate Allowed)       : 3,691
+False Positives (Legitimate Blocked)      : 100
+False Negatives (Attacks Missed)          : 25
+True Positives (Attacks Blocked)          : 16,184
 -----------------------------------------------------------------
 Total Legitimate User Sessions Tested     : 3,791
-Exact False Positives (Users Blocked)     : 103
-False Positive Rate (Legitimate Disrupted): 2.72%
-Attack Recall (Attacks Successfully Caught): 99.83%
+Exact False Positives (Users Blocked)     : 100
+False Positive Rate (Legitimate Disrupted): 2.64%
+Attack Recall (Attacks Successfully Caught): 99.85%
 =================================================================
 ```
 
@@ -366,16 +368,16 @@ Attack Recall (Attacks Successfully Caught): 99.83%
 | Operational Parameter | Standard Posture ($\tau = 0.50$) | Aggressive Posture ($\tau = 0.30$) | Net Operational Impact |
 | :--- | :---: | :---: | :--- |
 | **Threat Decision Threshold** | $\ge 0.50$ | $\ge 0.30$ | Lowered barrier for threat categorization. |
-| **Attacks Successfully Caught ($TP$)** | 16,168 | 16,181 | **+13 additional attacks intercepted.** |
-| **Attacks Missed ($FN$)** | 41 | **28** | **31.7% reduction in security breaches.** |
-| **Attack Detection Recall** | 99.75% | **99.83%** | Increased security perimeter coverage. |
-| **Legitimate Sessions Allowed ($TN$)** | 3,711 | 3,688 | 23 fewer benign connections permitted. |
-| **Legitimate Users Blocked ($FP$)** | 80 | **103** | **+23 innocent transactions terminated.** |
-| **False Alarm Rate on Benign Traffic** | 2.11% | **2.72%** | **+28.8% increase in false alerts.** |
+| **Attacks Successfully Caught ($TP$)** | 16,175 | 16,184 | **+9 additional attacks intercepted.** |
+| **Attacks Missed ($FN$)** | 34 | **25** | **26.5% reduction in security breaches.** |
+| **Attack Detection Recall** | 99.79% | **99.85%** | Increased security perimeter coverage. |
+| **Legitimate Sessions Allowed ($TN$)** | 3,715 | 3,691 | 24 fewer benign connections permitted. |
+| **Legitimate Users Blocked ($FP$)** | 76 | **100** | **+24 innocent transactions terminated.** |
+| **False Alarm Rate on Benign Traffic** | 2.00% | **2.64%** | **+32.0% increase in false alerts.** |
 
 ### 12.3 Ethical and Operational Dilemmas for SOC Engineers
-1. **Accidental Self-Inflicted Denial of Service:** Lowering the threshold to 0.30 captures 13 additional stealthy attacks, but penalizes 103 legitimate users by dropping their connections. In an e-commerce, banking, or medical setting, falsely blocking 2.72% of valid users can lead to severe reputational damage and revenue loss.
-2. **SOC Alert Fatigue & Burnout:** An enterprise processing millions of connections per hour with a 2.72% false positive rate will generate tens of thousands of bogus alerts daily. SOC Level 1 analysts become inundated, increasing the probability that genuine alerts are dismissed or muted.
+1. **Accidental Self-Inflicted Denial of Service:** Lowering the threshold to 0.30 captures 9 additional stealthy attacks, but penalizes 100 legitimate users by dropping their connections. In an e-commerce, banking, or medical setting, falsely blocking 2.64% of valid users can lead to severe reputational damage and revenue loss.
+2. **SOC Alert Fatigue & Burnout:** An enterprise processing millions of connections per hour with a 2.64% false positive rate will generate tens of thousands of bogus alerts daily. SOC Level 1 analysts become inundated, increasing the probability that genuine alerts are dismissed or muted.
 3. **Recommended Tiered Mitigation Architecture:** Rather than a binary drop/pass policy, production systems should adopt a multi-tier confidence response:
    - **Confidence $\ge 80\%$:** Automated inline packet drop, IP quarantine, and firewall rule deployment.
    - **Confidence $30\% - 79\%$:** Non-destructive mitigation—enforce challenge-response (CAPTCHA / Step-up Multi-Factor Authentication), apply bandwidth QoS rate-limiting, and queue metadata for asynchronous analyst triage.
@@ -415,9 +417,9 @@ Attack Recall (Attacks Successfully Caught): 99.83%
 
 This academic project successfully implements, evaluates, and documents an **AI-Driven Cyber Threat Awareness and Detection Prototype** utilizing real-world network telemetry from the **TON_IoT Network Dataset**.
 
-By enforcing strict train/test data isolation and eliminating topological identifiers, the prototype achieved benchmark accuracies of **99.89%** with a Decision Tree Classifier and **99.42%** with a Multi-Layer Perceptron neural network across 20,000 holdout flows. Crucially, the investigation demonstrates that while the Decision Tree offers superior training efficiency ($0.539$ s vs. $12.279$ s) and rule interpretability, the operational thresholding of neural probabilities allows security administrators to tune defense postures to specific risk tolerances. 
+By enforcing strict train/test data isolation and eliminating topological identifiers, the prototype achieved benchmark accuracies of **99.89%** with a tuned Decision Tree Classifier (criterion='entropy', max depth 15) and **99.44%** with an expanded Multi-Layer Perceptron neural network (128-64 architecture, alpha=0.0005) across 20,000 holdout flows. Crucially, the investigation demonstrates that while the Decision Tree offers superior training efficiency ($0.909$ s vs. $41.071$ s) and rule interpretability, the operational thresholding of neural probabilities allows security administrators to tune defense postures to specific risk tolerances. 
 
-The aggressive posture simulation highlighted the fundamental operational dilemma of cybersecurity: lowering detection thresholds decreases missed intrusions by 31.7% but increases legitimate user disruption to 2.72%. Ultimately, the research demonstrates that machine learning models must be paired with tiered mitigation architectures and human-in-the-loop operational workflows to provide robust, practical protection for modern enterprise and IoT infrastructures.
+The aggressive posture simulation highlighted the fundamental operational dilemma of cybersecurity: lowering detection thresholds decreases missed intrusions by 26.5% but increases legitimate user disruption to 2.64%. Ultimately, the research demonstrates that machine learning models must be paired with tiered mitigation architectures and human-in-the-loop operational workflows to provide robust, practical protection for modern enterprise and IoT infrastructures.
 
 ---
 

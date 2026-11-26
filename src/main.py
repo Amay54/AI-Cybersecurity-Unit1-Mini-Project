@@ -2,6 +2,7 @@
 AI-Driven Cyber Threat Awareness and Detection Prototype
 Academic Mini-Project: Cyber Threat Detection using the TON_IoT Network Dataset
 Author: Dhruv Arora
+Maintained & Evaluated by: Amay Yadav (Roll No: 2301730311, 4th Year, Section E, B.Tech CSE AI & ML)
 """
 
 import os
@@ -29,28 +30,43 @@ from sklearn.metrics import (
     ConfusionMatrixDisplay
 )
 
-import kagglehub
-
 
 def main():
     print("=" * 70)
     print("  AI-Driven Cyber Threat Awareness & Detection Prototype (TON_IoT)")
-    print("  Author: Dhruv Arora | Unit 1 Cybersecurity Mini-Project")
+    print("  Author: Dhruv Arora | Maintained by: Amay Yadav (Roll: 2301730311)")
+    print("  Unit 1 Cybersecurity Mini-Project: Hyperparameter Tuned Architecture")
     print("=" * 70)
 
     # -------------------------------------------------------------
     # Task 2: Dataset Acquisition & Exploratory Data Analysis (EDA)
     # -------------------------------------------------------------
-    print("\n[+] Task 2: Ingesting TON_IoT Dataset via kagglehub...")
-    dataset_dir = kagglehub.dataset_download("arnobbhowmik/ton-iot-network-dataset")
-    print(f"[+] Dataset located at: {dataset_dir}")
-
-    csv_files = glob.glob(os.path.join(dataset_dir, "**", "*.csv"), recursive=True)
-    if not csv_files:
-        raise FileNotFoundError(f"No CSV files found in {dataset_dir}")
+    print("\n[+] Task 2: Ingesting TON_IoT Dataset...")
     
-    print(f"[+] Discovered {len(csv_files)} CSV file(s). Selecting: {os.path.basename(csv_files[0])}")
-    selected_csv = csv_files[0]
+    # Priority 1: Check local project data directory
+    local_data_path = os.path.join(os.path.dirname(__file__), "..", "data", "train_test_network.csv")
+    selected_csv = None
+    if os.path.exists(local_data_path):
+        selected_csv = os.path.abspath(local_data_path)
+    else:
+        # Priority 2: Check kagglehub cache or download
+        try:
+            import kagglehub
+            dataset_dir = kagglehub.dataset_download("arnobbhowmik/ton-iot-network-dataset")
+            csv_files = glob.glob(os.path.join(dataset_dir, "**", "*.csv"), recursive=True)
+            if csv_files:
+                selected_csv = csv_files[0]
+        except Exception:
+            # Fallback search in user cache
+            user_cache = os.path.expanduser(r"~/.cache/kagglehub/datasets/arnobbhowmik/ton-iot-network-dataset")
+            csv_files = glob.glob(os.path.join(user_cache, "**", "*.csv"), recursive=True)
+            if csv_files:
+                selected_csv = csv_files[0]
+
+    if not selected_csv or not os.path.exists(selected_csv):
+        raise FileNotFoundError("Could not locate train_test_network.csv in local data/ or kagglehub cache.")
+
+    print(f"[+] Loaded telemetry CSV: {selected_csv} ({os.path.getsize(selected_csv)/(1024*1024):.2f} MB)")
 
     # Load representative sample (100,000 records for high-fidelity evaluation)
     df = pd.read_csv(selected_csv, nrows=100000, low_memory=False)
@@ -141,9 +157,16 @@ def main():
 
     print(f"[+] Feature matrix prepared with {X_train.shape[1]} engineered features.")
 
-    print("\n[+] Training Decision Tree Classifier...")
+    # Tuned Decision Tree: entropy criterion, max_depth=15, min_samples_split=4, min_samples_leaf=2
+    print("\n[+] Training Tuned Decision Tree Classifier (criterion='entropy', max_depth=15, min_samples_split=4, min_samples_leaf=2)...")
     dt_start = time.time()
-    dt = DecisionTreeClassifier(max_depth=12, random_state=42)
+    dt = DecisionTreeClassifier(
+        criterion='entropy',
+        max_depth=15,
+        min_samples_split=4,
+        min_samples_leaf=2,
+        random_state=42
+    )
     dt.fit(X_train, y_train)
     dt_time = time.time() - dt_start
 
@@ -154,7 +177,7 @@ def main():
     dt_f1 = f1_score(y_test, dt_preds, zero_division=0)
 
     print("=" * 60)
-    print("           DECISION TREE CLASSIFIER EVALUATION")
+    print("       TUNED DECISION TREE CLASSIFIER EVALUATION")
     print("=" * 60)
     print(f"Training Time : {dt_time:.4f} seconds")
     print(f"Accuracy      : {dt_acc * 100:.2f}%")
@@ -168,13 +191,16 @@ def main():
     # -------------------------------------------------------------
     # Task 4: Deep Learning Threat Classification (MLP Neural Net)
     # -------------------------------------------------------------
-    print("\n[+] Task 4: Training Multi-Layer Perceptron (MLP) Neural Network...")
+    # Tuned MLP: hidden_layer_sizes=(128, 64), alpha=0.0005, max_iter=30, batch_size=256
+    print("\n[+] Task 4: Training Tuned Multi-Layer Perceptron (MLP) Neural Network (layers=(128,64), alpha=0.0005, max_iter=30)...")
     mlp_start = time.time()
     mlp = MLPClassifier(
-        hidden_layer_sizes=(64, 32),
+        hidden_layer_sizes=(128, 64),
         activation='relu',
         solver='adam',
-        max_iter=25,
+        alpha=0.0005,
+        batch_size=256,
+        max_iter=30,
         random_state=42,
         early_stopping=True
     )
@@ -188,7 +214,7 @@ def main():
     mlp_f1 = f1_score(y_test, mlp_preds, zero_division=0)
 
     print("=" * 60)
-    print("      MLP NEURAL NETWORK (DEEP LEARNING) EVALUATION")
+    print("   TUNED MLP NEURAL NETWORK (DEEP LEARNING) EVALUATION")
     print("=" * 60)
     print(f"Training Time : {mlp_time:.4f} seconds")
     print(f"Accuracy      : {mlp_acc * 100:.2f}%")
